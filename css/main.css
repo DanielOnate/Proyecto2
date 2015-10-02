@@ -1,0 +1,12 @@
+body{
+	background: yellow;
+	padding: 0;
+	margin: 0;
+	font-family: Arial, Helvetica, Calibri, TIMES NEW ROMAN;
+
+}
+p{
+	background-color: gray;
+	text-decoration: underline;
+	text-align: center;
+}
