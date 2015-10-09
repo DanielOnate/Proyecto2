@@ -1,0 +1,72 @@
+<?php 
+		// cargamos el config
+	require_once('config.php');
+		//cargamos header desde la ruta definida en el config
+	require_once(TEMPLATES_PATH . '\cabecera.php');
+?>
+<?php
+
+$contadoru=0;
+	$conexion=mysqli_connect("localhost", "root", "sa_aeg1", "tienda");
+		mysqli_set_charset($conexion, "utf8");
+	$peticion="select * from clientes where usuario='".$_POST['usuario']."' and contrasena='".$_POST['contrasena']."'";
+
+	$resultado=mysqli_query($conexion, $peticion);
+		while($fila=mysqli_fetch_array($resultado)){
+			$contadoru++;
+			$_SESSION['usuario']=$fila['id'];
+		}
+if($contadoru>0){
+		$fecha=time();
+		$peticion="insert  into pedidos values (null, ".$_SESSION['usuario'].", from_unixtime(".$fecha."),'0')";
+
+		$resultado=mysqli_query($conexion, $peticion);
+
+
+
+
+		$peticion2="select * from pedidos where id_cliente='".$_SESSION['usuario']."' order by fecha desc limit 1";
+		
+		$resultado2=mysqli_query($conexion, $peticion2);
+			while($fila2=mysqli_fetch_array($resultado2)){
+				$_SESSION['id_pedido']=$fila2['id'];
+				
+			}
+			
+
+
+			for($i=0;$i<$_SESSION['contador']; $i++){
+					$peticion3="insert into lineas_pedido values (null,'".$_SESSION['id_pedido']."','".$_SESSION['producto'][$i]."','1')";
+				
+					$resultado3=mysqli_query($conexion, $peticion3);
+
+					$peticion4="select * from productos where id='".$_SESSION['producto'][$i]."'";
+					$resultado4=mysqli_query($conexion, $peticion4);
+						while($fila4=mysqli_fetch_array($resultado4)){
+							$existencias=$fila4['existencias'];
+							
+							$peticion5="update productos set existencias='".($existencias-1)."'where id='".$_SESSION['producto'][$i]."'";
+							$resultado5=mysqli_query($conexion, $peticion5);
+						}
+				}
+
+
+		echo "<br>Tu pedido se ha realizado satisfactoriamente.<br>Redirigiendo a la página principal en 5 segundos";
+
+		session_destroy();
+
+		echo '<meta http-equiv="refresh" content="5; url=../index.php">';
+
+}else {
+	echo "El usuario no existe. Volviendo a la tienda en 5 segundos";
+	echo '<meta http-equiv="refresh" content="5; url=../confirmar.php">';
+} 
+
+mysqli_close($conexion);
+
+
+	// cargamos el config
+require_once('config.php');
+	//cargamos header desde la ruta definida en el config
+require_once(TEMPLATES_PATH . '\pie.php');
+?>
